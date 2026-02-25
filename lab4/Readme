@@ -1,1 +1,59 @@
-readme
+1. SimpleERC20.sol（教学版 ERC20）
+实现了最核心的 ERC20 功能：
+balanceOf
+transfer
+approve
+transferFrom
+_mint / _burn
+无复杂权限、无安全扩展，便于学生理解。
+2. MockCollateral.sol（mETH）
+继承 SimpleERC20。
+构造函数：
+constructor() SimpleERC20("Mock ETH", "mETH")
+给部署者铸造大量 mETH：_mint(msg.sender, 1_000_000 ether)
+mint(to, amount)：方便老师给学生发 mETH。
+3. Stablecoin.sol（cUSD）
+继承 SimpleERC20。
+有两个权限变量：
+owner：合约部署者
+minter：允许铸币 / 销毁的地址（只会设置为 VaultEngine）。
+关键函数：
+setMinter(address)：只有 owner 能调
+mint(to, amount) / burn(from, amount)：只有 minter（VaultEngine）能调。
+4. MockOracle.sol（预言机）
+owner：部署者
+price：1 mETH = price USD（1e18 精度）
+函数：
+setPrice(uint256 _price)：owner 改价格
+getPrice() / price()：返回当前价格。
+5. VaultEngine.sol（抵押与清算引擎）
+状态：
+
+合约引用：
+collateralToken（mETH）
+stablecoin（cUSD）
+oracle（MockOracle）
+参数：
+collateralFactor：例如 1.5e18（150%）
+liquidationThreshold：例如 1.2e18（120%）
+liquidationPenalty：例如 1.1e18（清算人获得 110% 抵押物价值）
+用户仓位：
+solidity
+struct Position {
+    uint256 collateral; // mETH 数量
+    uint256 debt;       // cUSD 数量
+}
+mapping(address => Position) public positions;
+关键函数：
+
+deposit(amount)：存入抵押物。
+borrow(amount)：借出稳定币。内部使用 _isHealthy 检查抵押率 >= collateralFactor。
+repay(amount)：还款 + burn。
+withdraw(amount)：提取抵押物，提取后仍需满足抵押率 >= collateralFactor。
+liquidate(user)：如果 user 抵押率 < liquidationThreshold，清算人可：
+偿还全部 debt
+获得按 liquidationPenalty 打折计算的 抵押物。
+内部计算函数：
+
+_isHealthy(collateral, debt, factor)：判断 collateral_value / debt_value >= factor。
+_debtToCollateral(debt)：根据 oracle 价把 USD 债务换算成 mETH 数量。
