@@ -22,6 +22,7 @@ Change to lab4 directory:
 
 ```bash
 cd lab4_oracle
+npm install
 ```
 
 ### 
@@ -413,10 +414,9 @@ npx hardhat run scripts/twap_demo.js --network localhost
 
 The TWAP formula computes a weighted average where the weight is time duration:
 
-$$
-\text{TWAP}(t_k, t_n) = \frac{\sum_{i=k}^{n-1} P_i \cdot \Delta T_i}{T_n - T_k}
-$$
-Where $P_i$ is the price at observation $i$, and $\Delta T_i = T_{i+1} - T_i$ is how long that price lasted.
+$\text{TWAP}(t_k, t_n) = \frac{\sum_{i=k}^{n-1} P_i \cdot \Delta T_i}{T_n - T_k}$
+
+where $P_i$ is the price at observation $i$, and $\Delta T_i = T_{i+1} - T_i$ is how long that price lasted.
 
 **Why this resists manipulation:**
 
