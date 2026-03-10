@@ -217,7 +217,14 @@ contract PerpetualFuturesExchange {
 
     function getTraderEthBalance(address trader) external view returns (uint256) {
     return trader.balance;  
-}
+    }
+
+    function ownerWithdraw(uint256 amount) external onlyOwner {
+    require(amount <= address(this).balance, "not enough balance");
+    totalLiquidity -= amount; 
+    payable(owner).transfer(amount);
+    }
 
 }
+
 
